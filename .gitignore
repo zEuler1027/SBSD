@@ -1,0 +1,5 @@
+*.out
+*.slurm
+**/__pycache__/
+*.pyc
+tb_logs/
