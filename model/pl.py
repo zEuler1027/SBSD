@@ -31,19 +31,20 @@ class pl_module(L.LightningModule):
         # training_step defines the train loop. It is independent of forward
         loss = self.compute_loss(batch)
         self.training_step_outputs.append(loss)
+        self.log('train_loss', loss)
         return loss
     
-    def on_training_epoch_end(self):
+    def on_train_epoch_end(self):
         outputs = self.training_step_outputs
-        avg_loss = torch.stack([x['loss'] for x in outputs]).mean()
+        avg_loss = torch.stack(outputs).mean()
         self.log('avg_train_loss', avg_loss)
         print(f"Epoch {self.current_epoch}: avg_train_loss = {avg_loss}")
         self.training_step_outputs.clear()
+        print('max_memory_allocated:{}GB'.format(torch.cuda.max_memory_allocated() / 1024**3 ))
     
     def validation_step(self, batch, batch_idx):
         # validation_step defines the train loop. It is independent of forward
         loss = self.compute_loss(batch)
-        self.log("val_loss", loss)
         self.validation_step_outputs.append(loss)
         return loss
     

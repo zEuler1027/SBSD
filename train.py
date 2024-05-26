@@ -88,7 +88,7 @@ trainer = L.Trainer(
     profiler=None,
     accumulate_grad_batches=1,
     limit_train_batches=None,
-    limit_val_batches=20,
+    limit_val_batches=200,
     # max_time="00:10:00:00",
 )
 
