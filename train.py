@@ -57,13 +57,13 @@ model = pl_module(train_config, model_config, utils_config)
 if not train_config['debugging']:
     logger = TensorBoardLogger("tb_logs", name=train_config['model_name'], version=job_id)
     checkpoint_callback = ModelCheckpoint(
-    monitor="val_loss",
+    monitor="avg_val_loss",
     dirpath=f'tb_logs/{train_config["model_name"]}/{job_id}/checkpoints',
-    filename="scorenet-{epoch:03d}-{val_loss:.3f}",
-    every_n_epochs=200,
+    filename="scorenet-{epoch:03d}-{avg_val_loss:.3f}",
+    every_n_epochs=100,
     save_top_k=-1,
     )
-    lr_monitor = LearningRateMonitor(logging_interval="step")
+    lr_monitor = LearningRateMonitor(logging_interval="epoch")
     progress_bar = TQDMProgressBar(refresh_rate=100)
     callbacks = [checkpoint_callback, progress_bar, lr_monitor]
 else:
@@ -77,7 +77,7 @@ num_gpus = torch.cuda.device_count()
 # create the trainer
 trainer = L.Trainer(
     fast_dev_run=train_config['debugging'], 
-    max_epochs=1000,
+    max_epochs=500,
     accelerator='gpu' if torch.cuda.is_available() else 'cpu',
     deterministic=False,
     logger=logger,
