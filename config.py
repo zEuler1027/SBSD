@@ -6,7 +6,7 @@ train_config = dict(
     debugging = False,
     model_name = 'painn',
     batch_size = 64,
-    lr = 5e-4,
+    lr = 1e-4,
     clip_grad = True,
 )
 
