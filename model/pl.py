@@ -41,7 +41,6 @@ class pl_module(L.LightningModule):
         # training_step defines the train loop. It is independent of forward
         loss = self.compute_loss(batch)
         self.training_step_outputs.append(loss)
-        self.log('train_loss', loss)
         return loss
     
     def on_train_epoch_end(self):

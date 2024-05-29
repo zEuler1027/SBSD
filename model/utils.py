@@ -302,7 +302,7 @@ class DiffSchedule(torch.nn.Module):
             return torch.linspace(1, self.eps, num_steps, device=num_steps.device)
         if mode.lower() == 'cosine':
             return 0.5 * (
-                1 - torch.cos(torch.linspace(0, np.pi, num_steps, device=num_steps.device))
+                1 - torch.cos(torch.linspace(np.pi, 100*self.eps, num_steps, device=num_steps.device))
             )
 
 class ClipQueue:

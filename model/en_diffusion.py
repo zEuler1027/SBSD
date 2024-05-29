@@ -1,9 +1,8 @@
 import torch
 from typing import Tuple, List
 from model.graph_tools import get_batch_mask_for_nodes, get_full_edges_index
-from model.sample_tools import sample_center_gravity_zero_gaussian_batch
+from model.sample_tools import sample_center_gravity_zero_gaussian_batch, remove_mean_batch
 from model.utils import DiffSchedule
-
 
 
 class VESDE(torch.nn.Module):
@@ -32,10 +31,12 @@ class VESDE(torch.nn.Module):
         
         # compute score
         score = self.score_model(atomic_numbers, nodes_t, perturbed_pos, edge_index)
+        score = score / std[:, None] # normalize score
         if torch.any(torch.isnan(score)):
             print('nan in score, resetting to randn')
             score = torch.randn_like(score)
-            
+        score = remove_mean_batch(score, nodes_mask)
+        
         l2loss = torch.mean(torch.sum((score * std[:, None] + noise)**2, dim=-1))
         return l2loss
 
@@ -71,9 +72,11 @@ class VESDE(torch.nn.Module):
         for time_step, step_size in zip(time_steps, step_sizes):
             batch_time_step = torch.ones(pos.size(0), device=device) * time_step
             g = self.schedule.diffusion_coeff(batch_time_step)
-            mean_pos = pos + (g**2)[:, None] * self.score_model(
-                atomic_numbers, batch_time_step, pos, edge_index
-            ) * step_size
+            score = self.score_model(atomic_numbers, batch_time_step, pos, edge_index)
+            # normalize score
+            score = score / self.schedule.marginal_prob_std(batch_time_step)[:, None]
+            score = remove_mean_batch(score, nodes_mask)
+            mean_pos = pos + (g**2)[:, None] * score * step_size
             noise = sample_center_gravity_zero_gaussian_batch(
                 (pos_shape[0], pos_shape[1]), nodes_mask
             )

@@ -209,7 +209,7 @@ class PaiNN(torch.nn.Module):
                 edge_rbf,
                 diff,
             )
-            x = x + dx
+            x = x + dx + t_emb # add time embedding
             vec = vec + dvec
             x = x * self.inv_sqrt_2
 
@@ -520,8 +520,9 @@ class GatedEquivariantBlock(nn.Module):
         return x, v
 
 if __name__ == '__main__':
-    model = OAPaiNN()
-    s0 = torch.rand(9, 8, dtype=torch.float32)
+    model = PaiNN()
+    atomic_numbers = torch.tensor([1, 6, 6, 1, 1, 1, 1, 1, 1], dtype=torch.long)
+    t = torch.tensor([0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4], dtype=torch.float)
     from torch_geometric.nn import radius_graph
     pos = torch.tensor([[ 0.0072, -0.5687,  0.0000],
         [-1.2854,  0.2499,  0.0000],
@@ -534,13 +535,10 @@ if __name__ == '__main__':
         [ 1.9857, -0.1365,  0.0000]], dtype = torch.float)
 
     edge_index = radius_graph(pos, r=1.70, batch=None, loop=False)
-    subgraph_mask = torch.tensor([1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0], dtype=torch.long)[:, None]
-    out = model(s0, pos, edge_index, subgraph_mask=subgraph_mask)
     from e3nn import o3
     rot = o3.rand_matrix()
-    pos_rot = pos
-    pos_rot[:4] = pos[:4] @ rot
-    out_rot = model(s0, pos_rot, edge_index, subgraph_mask=subgraph_mask)
-    out[1][:4] = out[1][:4] @ rot
+    pos_rot = pos @ rot
+    out_rot = model(atomic_numbers, t, pos, edge_index) @ rot
+    out = model(atomic_numbers, t, pos_rot, edge_index)
     print((out[1] - out_rot[1]).max())
     print((out[0] - out_rot[0]).max())
