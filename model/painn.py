@@ -209,7 +209,7 @@ class PaiNN(torch.nn.Module):
                 edge_rbf,
                 diff,
             )
-            x = x + dx + t_emb # add time embedding
+            x = x + dx 
             vec = vec + dvec
             x = x * self.inv_sqrt_2
 

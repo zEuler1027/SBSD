@@ -34,7 +34,7 @@ class VESDE(torch.nn.Module):
         score = score / std[:, None] # normalize score
         if torch.any(torch.isnan(score)):
             print('nan in score, resetting to randn')
-            score = torch.randn_like(score)
+            score = torch.randn_like(score, requires_grad=True)
         score = remove_mean_batch(score, nodes_mask)
         
         l2loss = torch.mean(torch.sum((score * std[:, None] + noise)**2, dim=-1))
@@ -73,7 +73,11 @@ class VESDE(torch.nn.Module):
             batch_time_step = torch.ones(pos.size(0), device=device) * time_step
             g = self.schedule.diffusion_coeff(batch_time_step)
             score = self.score_model(atomic_numbers, batch_time_step, pos, edge_index)
+            
             # normalize score
+            if torch.any(torch.isnan(score)):
+                print('nan in score, resetting to randn')
+                score = torch.randn_like(score)
             score = score / self.schedule.marginal_prob_std(batch_time_step)[:, None]
             score = remove_mean_batch(score, nodes_mask)
             mean_pos = pos + (g**2)[:, None] * score * step_size

@@ -18,9 +18,6 @@ job_id = os.environ.get('SLURM_JOB_ID', 'default_version') # get slurm_id
 warnings.filterwarnings("ignore", message="An issue occurred while importing 'pyg-lib'.*") 
 warnings.filterwarnings("ignore", message="An issue occurred while importing 'torch-sparse'.*") 
 
-# use the same device as the data
-device = data_config['device']
-
 # create the dataset
 dataset = QM9Dataset(**data_config)
 train_dataset, val_dataset = torch.utils.data.random_split(
@@ -33,12 +30,14 @@ train_loader = torch.utils.data.DataLoader(
     train_dataset,
     batch_size=train_config['batch_size'],
     collate_fn=dataset.collate_fn,
+    num_workers=train_config['num_workers'],
 )
 
 val_loader = torch.utils.data.DataLoader(
     val_dataset,
     batch_size=train_config['batch_size'],
     collate_fn=dataset.collate_fn,    
+    num_workers=train_config['num_workers'],
 )
 
 # print the config and data_size
@@ -77,7 +76,7 @@ num_gpus = torch.cuda.device_count()
 # create the trainer
 trainer = L.Trainer(
     fast_dev_run=train_config['debugging'], 
-    max_epochs=500,
+    max_epochs=train_config['epoch'],
     accelerator='gpu' if torch.cuda.is_available() else 'cpu',
     deterministic=False,
     logger=logger,

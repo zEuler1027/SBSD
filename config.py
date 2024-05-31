@@ -4,23 +4,24 @@ from datetime import datetime
 
 train_config = dict(
     debugging = False,
+    epoch = 500,
     model_name = 'painn',
-    batch_size = 64,
+    batch_size = 128,
     lr = 1e-4,
+    num_workers = 0,
     clip_grad = True,
 )
 
 model_config = dict(
-    hidden_channels = 256,
+    hidden_channels = 1024,
     out_channels = 7,
-    num_layers = 6,
+    num_layers = 8,
     num_rbf = 256,
     cutoff = 10.0,
 )
 
 data_config = dict(
     path = 'data/qm9/train.pkl', # path to the data
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu"),
 )
 
 utils_config = dict(

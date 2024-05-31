@@ -4,7 +4,7 @@ import pickle
 
 
 class QM9Dataset(Dataset):
-    def __init__(self, path: str, device: str) -> None:
+    def __init__(self, path: str, device: str='cpu') -> None:
         super().__init__()
         self.path = path
         self.raw_data = pickle.load(open(path, "rb"))
@@ -28,6 +28,7 @@ class QM9Dataset(Dataset):
         output['mask'] = torch.tensor(
             [mol_size for mol_size in map(len, elements)],
             dtype=torch.long,
+            device=output['atomic_numbers'].device
         )
         return output
     
