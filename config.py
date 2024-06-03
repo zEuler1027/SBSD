@@ -4,7 +4,7 @@ from datetime import datetime
 
 train_config = dict(
     debugging = False,
-    epoch = 500,
+    epoch = 1000,
     model_name = 'painn',
     batch_size = 128,
     lr = 1e-4,
@@ -13,10 +13,10 @@ train_config = dict(
 )
 
 model_config = dict(
-    hidden_channels = 1024,
+    hidden_channels = 512,
     out_channels = 7,
     num_layers = 8,
-    num_rbf = 256,
+    num_rbf = 512,
     cutoff = 10.0,
 )
 
