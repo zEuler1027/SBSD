@@ -3,3 +3,4 @@
 **/__pycache__/
 *.pyc
 tb_logs/
+*.ckpt
